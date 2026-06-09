@@ -1,9 +1,9 @@
-from .session import get_db_session, Session, engine
+from .session import get_db_session, AsyncSession, engine
 
 __all__ = [
     # sessions
     "get_db_session",
-    "Session",
+    "AsyncSession",
     "engine"
     # append below if you have more to export
 ]
