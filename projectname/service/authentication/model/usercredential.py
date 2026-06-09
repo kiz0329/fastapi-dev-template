@@ -15,7 +15,8 @@ class UserCredential(DBModelBase):
     username: Mapped[str] = mapped_column(
         String(SHORT_TEXT_LENGTH),
         nullable=False,
-        unique=True
+        unique=True,
+        index=True
     )
     password_hash: Mapped[str] = mapped_column(
         String(SHORT_TEXT_LENGTH),
@@ -27,8 +28,8 @@ class UserCredential(DBModelBase):
     )
     user_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("user__users.id"),
-        primary_key=True
+        ForeignKey("users.id"),
+        nullable=True,
     )
 
     user: Mapped["User"] = relationship(
