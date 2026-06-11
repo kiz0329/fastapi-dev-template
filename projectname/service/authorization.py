@@ -1,17 +1,23 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException, status 
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from .token import verify_token, TokenData
-from .scope import AccessLevel, get_access_level_scope
+from ..system.const import (
+    GUEST_SCOPE,
+    MEMBER_SCOPE,
+    SUPERIOR_SCOPE,
+    ADMIN_SCOPE,
+    DEVELOPER_SCOPE,
+)
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="auth/token",
     scopes={
-        get_access_level_scope(AccessLevel.GUEST): "Guest access",
-        get_access_level_scope(AccessLevel.MEMBER): "Member access",
-        get_access_level_scope(AccessLevel.SUPERIOR): "Superior access",
-        get_access_level_scope(AccessLevel.ADMIN): "Admin access",
-        get_access_level_scope(AccessLevel.DEVELOPER): "Developer access",
+        GUEST_SCOPE: "Guest access",
+        MEMBER_SCOPE: "Member access",
+        SUPERIOR_SCOPE: "Superior access",
+        ADMIN_SCOPE: "Admin access",
+        DEVELOPER_SCOPE: "Developer access",
     })
 
 

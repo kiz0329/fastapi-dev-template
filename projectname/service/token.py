@@ -10,6 +10,7 @@ from ..model.user import User
 from ..schema.refreshtoken import RefreshTokenUploadSchema
 from ..model.refreshtoken import RefreshToken as RefreshTokenModel
 from ..schema.token import Token, RefreshToken
+from ..service.scope import AccessLevel, generate_access_level_scopes
 from ..system.const import SHORT_TEXT_LENGTH
 from ..system.error import ResourceNotFoundError, UniqueConstraintError
 from ..system.environment import JWT_ALGORITHM, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_DAYS
@@ -29,8 +30,12 @@ class TokenData(BaseModel):
     ] = []
 
 
-async def generate_tokens(user: User, db_session: SessionDep):
-    data = {"sub": user.username, "scopes": user.scopes}
+async def generate_tokens(user: User, db_session: SessionDep) -> Token:
+    access_level = AccessLevel(user.access_level)
+    data = {
+        "sub": user.username,
+        "scopes": generate_access_level_scopes(access_level),
+    }
     return Token(
         access_token=create_access_token(data),
         refresh_token=await create_refresh_token(user.id, db_session),
@@ -38,7 +43,7 @@ async def generate_tokens(user: User, db_session: SessionDep):
     )
 
 
-async def regenerate_tokens(refresh_token: str, db_session: SessionDep):
+async def regenerate_tokens(refresh_token: str, db_session: SessionDep) -> Token:
     await refreshtoken_crud.prune_expired_tokens(datetime.now(timezone.utc), db_session)
     try:
         model = await refreshtoken_crud.get_by_token(refresh_token, db_session)
@@ -49,7 +54,11 @@ async def regenerate_tokens(refresh_token: str, db_session: SessionDep):
             headers={"WWW-Authenticate": "Bearer"},
         )
     user = model.user
-    data = {"sub": user.username, "scopes": user.scopes}
+    access_level = AccessLevel(user.access_level)
+    data = {
+        "sub": user.username,
+        "scopes": generate_access_level_scopes(access_level),
+    }
     model = await rotate_refresh_token(model, db_session)
     return Token(
         access_token=create_access_token(data),

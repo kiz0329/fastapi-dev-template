@@ -6,12 +6,12 @@ from ..model.user import User
 from ..schema.user import UserUploadSchema, UserResponseSchema
 from ..schema.token import Token, RefreshToken
 from ..crud import refreshtoken_crud, user_crud
+from ..system.const import AccessLevel, ADMIN_SCOPE
 from ..system.error import ResourceNotFoundError
 from ..service.token import generate_tokens, regenerate_tokens, TokenData
 from ..service.account import modify_user_access_level
 from ..service.authorization import get_current_user
 from ..service.authentication import authenticate_user
-from ..service.scope import AccessLevel, get_access_level_scope
 
 
 router = APIRouter(
@@ -71,7 +71,7 @@ async def change_access_level(
     token_data: Annotated[
         TokenData,
         Security(get_current_user,
-                 scopes=[get_access_level_scope(AccessLevel.ADMIN)])
+                 scopes=[ADMIN_SCOPE])
     ],
     db_session: SessionDep,
 ):

@@ -12,6 +12,7 @@ from ..schema.abc import (
 from ..model.abc import DBModelBase, UserModelBase
 from ..database import SessionDep
 from ..service.password import verify_password, hash_password
+from ..system.const import AccessLevel
 from ..system.error import (
     ResourceNotFoundError,
     UniqueConstraintError,
@@ -179,6 +180,8 @@ class UserCRUDBase(CRUDBase[TUserModel, TUserUploadSchema, TUserQuerySchema]):
             db_session: SessionDep) -> TUserModel:
         hashed_password = hash_password(upload_schema.password)
         upload_data = upload_schema.model_dump(exclude={"password"})
+        if isinstance(upload_data.get("access_level"), AccessLevel):
+            upload_data["access_level"] = upload_data["access_level"].value
         upload_data["hashed_password"] = hashed_password
         obj = self._model(**upload_data)
         db_session.add(obj)

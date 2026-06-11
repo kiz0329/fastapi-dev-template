@@ -9,5 +9,12 @@ class AccessLevel(_Enum):
     DEVELOPER = _auto()
 
 
+GUEST_SCOPE = "guest"
+MEMBER_SCOPE = "member"
+SUPERIOR_SCOPE = "superior"
+ADMIN_SCOPE = "admin"
+DEVELOPER_SCOPE = "developer"
+
+
 SHORT_TEXT_LENGTH = 255
 DEVELOPER_USER_NAME = "developer"

@@ -17,7 +17,7 @@ async def ensure_developer_account():
     from projectname.system.environment import DEVELOPER_USER_PASSWORD
     from projectname.system.const import DEVELOPER_USER_NAME
     from projectname.service.password import hash_password
-    from projectname.service.scope import generate_access_level_scopes, AccessLevel
+    from projectname.service.scope import AccessLevel
     async with AsyncSessionLocal() as db_session:
         result = await db_session.execute(
             select(User).where(User.username == DEVELOPER_USER_NAME)
@@ -26,9 +26,7 @@ async def ensure_developer_account():
 
         def fill_developer_info(user: User):
             user.hashed_password = hash_password(DEVELOPER_USER_PASSWORD)
-            user.scopes = " ".join(
-                generate_access_level_scopes(AccessLevel.DEVELOPER)
-            )
+            user.access_level = AccessLevel.DEVELOPER.value
             user.first_name = "安治川"
             user.last_name = "鐵之助"
 

@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
-from sqlalchemy import Integer, DateTime, String, func
+from sqlalchemy import Integer, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from ..system.const import SHORT_TEXT_LENGTH, AccessLevel
-from ..service.scope import generate_access_level_scopes
 
 
 class Base(DeclarativeBase):
@@ -40,8 +39,8 @@ class UserModelBase(DBModelBase):
         String(SHORT_TEXT_LENGTH),
         nullable=False
     )
-    scopes: Mapped[str] = mapped_column(
-        String(SHORT_TEXT_LENGTH),
+    access_level: Mapped[int] = mapped_column(
+        Integer,
         nullable=False,
-        default=" ".join(generate_access_level_scopes(AccessLevel.GUEST))
+        default=AccessLevel.GUEST.value
     )

@@ -1,5 +1,6 @@
 from typing import Annotated, Optional
 from datetime import datetime
+from ..system.const import AccessLevel
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -49,9 +50,9 @@ class UserUploadSchemaBase(UploadSchemaBase):
         str,
         Field(description="The password for authentication")
     ]
-    scopes: Annotated[
-        str,
-        Field(description="The space-separated scopes for the user")
+    access_level: Annotated[
+        AccessLevel,
+        Field(description="The access level for the user", default=AccessLevel.GUEST)
     ]
 
 
@@ -64,9 +65,9 @@ class UserResponseSchemaBase(ResponseSchemaBase):
         str,
         Field(description="The hashed password for authentication")
     ]
-    scopes: Annotated[
-        str,
-        Field(description="The space-separated scopes for the user")
+    access_level: Annotated[
+        AccessLevel,
+        Field(description="The access level for the user")
     ]
 
 
