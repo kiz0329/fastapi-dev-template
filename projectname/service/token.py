@@ -5,10 +5,9 @@ from fastapi import HTTPException, status
 from pydantic import BaseModel, Field
 import ssl
 from ..crud import refreshtoken_crud
-from ..database import AsyncSession
+from ..database import SessionDep
 from ..model.user import User
 from ..schema.refreshtoken import RefreshTokenUploadSchema
-from ..service.token import create_access_token, create_refresh_token
 from ..model.refreshtoken import RefreshToken as RefreshTokenModel
 from ..schema.token import Token, RefreshToken
 from ..system.const import SHORT_TEXT_LENGTH
@@ -30,7 +29,7 @@ class TokenData(BaseModel):
     ] = []
 
 
-async def generate_tokens(user: User, db_session: AsyncSession):
+async def generate_tokens(user: User, db_session: SessionDep):
     data = {"sub": user.username, "scopes": user.scopes}
     return Token(
         access_token=create_access_token(data),
@@ -39,7 +38,7 @@ async def generate_tokens(user: User, db_session: AsyncSession):
     )
 
 
-async def regenerate_tokens(refresh_token: str, db_session: AsyncSession):
+async def regenerate_tokens(refresh_token: str, db_session: SessionDep):
     await refreshtoken_crud.prune_expired_tokens(datetime.now(timezone.utc), db_session)
     try:
         model = await refreshtoken_crud.get_by_token(refresh_token, db_session)
@@ -111,7 +110,7 @@ def verify_token(token: str):
 # Refresh token
 
 
-async def create_refresh_token(user_id: int, db_session: AsyncSession, *, expire_at: Optional[datetime] = None):
+async def create_refresh_token(user_id: int, db_session: SessionDep, *, expire_at: Optional[datetime] = None):
     token = ssl.RAND_bytes(32).hex()
     refresh_token = RefreshTokenUploadSchema(
         token=token,
@@ -123,7 +122,7 @@ async def create_refresh_token(user_id: int, db_session: AsyncSession, *, expire
     return token
 
 
-async def rotate_refresh_token(model: RefreshTokenModel, db_session: AsyncSession) -> RefreshTokenModel:
+async def rotate_refresh_token(model: RefreshTokenModel, db_session: SessionDep) -> RefreshTokenModel:
     try:
         for _ in range(5):  # Try up to 5 times to generate a unique token
             try:

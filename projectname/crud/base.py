@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from ..schema.base import UploadSchema, QuerySchema
 from ..model.base import DBModelBase
-from ..database import AsyncSession
+from ..database import SessionDep
 from ..system.error import (
     ResourceNotFoundError,
     UniqueConstraintError,
@@ -60,7 +60,7 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
     async def create(
             self,
             upload_schema: TUploadSchema,
-            db_session: AsyncSession) -> TModel:
+            db_session: SessionDep) -> TModel:
         obj = self._model(**upload_schema.model_dump())
         db_session.add(obj)
         try:
@@ -74,7 +74,7 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
 
     async def get_list(
             self,
-            db_session: AsyncSession) -> Sequence[TModel]:
+            db_session: SessionDep) -> Sequence[TModel]:
         query = select(self._model)
         result = await db_session.execute(query)
         return result.scalars().all()
@@ -82,7 +82,7 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
     async def query(
             self,
             query_schema: TQuerySchema,
-            db_session: AsyncSession) -> Sequence[TModel]:
+            db_session: SessionDep) -> Sequence[TModel]:
         query = select(self._model)
         query_data = query_schema.model_dump(exclude_none=True)
         for field, value in query_data.items():
@@ -109,7 +109,7 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
     async def get_by_id(
             self,
             id: int,
-            db_session: AsyncSession) -> TModel:
+            db_session: SessionDep) -> TModel:
         result = await db_session.execute(select(self._model).where(self._model.id == id))
         if (res := result.scalars().first()) is None:
             raise ResourceNotFoundError(
@@ -121,7 +121,7 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
             self,
             id: int,
             upload_schema: TUploadSchema,
-            db_session: AsyncSession) -> TModel:
+            db_session: SessionDep) -> TModel:
         obj = await self.get_by_id(id, db_session)
         for field, value in upload_schema.model_dump(exclude_unset=False).items():
             setattr(obj, field, value)
@@ -137,7 +137,7 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
     async def delete(
             self,
             id: int,
-            db_session: AsyncSession) -> TModel:
+            db_session: SessionDep) -> TModel:
         obj = await self.get_by_id(id, db_session)
         await db_session.delete(obj)
         try:

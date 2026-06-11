@@ -1,13 +1,13 @@
 from sqlalchemy import select
 from .base import CRUDBase
-from ..database import AsyncSession
+from ..database import SessionDep
 from ..model.user import User
 from ..schema.user import UserUploadSchema, UserQuerySchema
 from ..system.error import ResourceNotFoundError
 
 
 class UserCRUD(CRUDBase[User, UserUploadSchema, UserQuerySchema]):
-    async def get_by_username(self, username: str, db_session: AsyncSession):
+    async def get_by_username(self, username: str, db_session: SessionDep):
         result = await db_session.execute(
             select(self._model).where(self._model.username == username)
         )

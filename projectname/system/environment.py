@@ -20,3 +20,8 @@ JWT_REFRESH_TOKEN_EXPIRE_DAYS = int(_os.getenv(
     "JWT_REFRESH_TOKEN_EXPIRE_DAYS",
     "7"
 ))
+
+DEVELOPER_USER_PASSWORD = _os.getenv(
+    "DEVELOPER_USER_PASSWORD",
+    "pwd"
+)

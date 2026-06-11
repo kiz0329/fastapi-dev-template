@@ -10,3 +10,4 @@ class AccessLevel(_Enum):
 
 
 SHORT_TEXT_LENGTH = 255
+DEVELOPER_USER_NAME = "developer"

@@ -1,11 +1,11 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, Body, HTTPException, status, Security
 from fastapi.security import OAuth2PasswordRequestForm
-from ..database import AsyncSession, get_db_session
+from ..database import SessionDep, get_db_session
 from ..model.user import User
 from ..schema.user import UnhashedUserUploadSchema, UserResponseSchema
 from ..schema.token import Token, RefreshToken
-from ..crud import refreshtoken_crud
+from ..crud import refreshtoken_crud, user_crud
 from ..system.error import ResourceNotFoundError
 from ..service.token import generate_tokens, regenerate_tokens, TokenData
 from ..service.account import register_user, modify_user_access_level
@@ -26,7 +26,7 @@ async def sign_in(
             User,
             Depends(authenticate_user)
         ],
-        db_session: Annotated[AsyncSession, Depends(get_db_session)]
+        db_session: SessionDep
 ):
     return await generate_tokens(user, db_session)
 
@@ -34,7 +34,7 @@ async def sign_in(
 @router.post("/refresh")
 async def refresh_token(
         refresh_token_data: Annotated[RefreshToken, Body()],
-        db_session: Annotated[AsyncSession, Depends(get_db_session)]
+        db_session: SessionDep
 ):
     return await regenerate_tokens(refresh_token_data.token, db_session)
 
@@ -42,7 +42,7 @@ async def refresh_token(
 @router.post("/signout", response_model=UserResponseSchema)
 async def sign_out(
     refresh_token_data: Annotated[RefreshToken, Body()],
-    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    db_session: SessionDep,
     token_data: Annotated[TokenData, Security(get_current_user, scopes=[])],
 ):
     model = await refreshtoken_crud.get_by_token(refresh_token_data.token, db_session)
@@ -59,7 +59,7 @@ async def sign_out(
 @router.post("/signup", response_model=UserResponseSchema, status_code=status.HTTP_201_CREATED)
 async def sign_up(
     user: Annotated[UnhashedUserUploadSchema, Body()],
-    db_session: Annotated[AsyncSession, Depends(get_db_session)]
+    db_session: SessionDep
 ):
     return await register_user(user, db_session)
 
@@ -68,12 +68,12 @@ async def sign_up(
 async def change_access_level(
     user_id: Annotated[int, Path(description="The ID of the user to modify")],
     access_level: Annotated[AccessLevel, Query(description="The new access level for the user")],
-    db_session: Annotated[AsyncSession, Depends(get_db_session)],
     token_data: Annotated[
         TokenData,
         Security(get_current_user,
                  scopes=[get_access_level_scope(AccessLevel.ADMIN)])
     ],
+    db_session: SessionDep,
 ):
     try:
         modified_user = await modify_user_access_level(user_id, access_level, db_session)
@@ -83,3 +83,15 @@ async def change_access_level(
             detail="User not found",
         )
     return modified_user
+
+
+@router.get("/", response_model=list[UserResponseSchema])
+async def get_users(
+    token_data: Annotated[
+        TokenData,
+        Security(get_current_user,
+                 scopes=[])
+    ],
+    db_session: SessionDep,
+):
+    return await user_crud.get_list(db_session)
