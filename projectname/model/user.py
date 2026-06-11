@@ -1,6 +1,6 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
-from .base import DBModelBase
+from .abc import DBModelBase
 from ..system.const import SHORT_TEXT_LENGTH, AccessLevel
 from ..service.scope import generate_access_level_scopes
 

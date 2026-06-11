@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from .base import CRUDBase
+from .abc import CRUDBase
 from ..database import SessionDep
 from ..model.user import User
 from ..schema.user import UserUploadSchema, UserQuerySchema

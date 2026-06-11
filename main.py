@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from projectname.database import engine
-from projectname.model.base import Base
+from projectname.model.abc import Base
 from projectname.router import auth_router
 
 

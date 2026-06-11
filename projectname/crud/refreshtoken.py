@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from sqlalchemy import select
-from .base import CRUDBase
+from .abc import CRUDBase
 from ..database import SessionDep
 from ..model.refreshtoken import RefreshToken
 from ..schema.refreshtoken import RefreshTokenUploadSchema, RefreshTokenQuerySchema

@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .base import DBModelBase
+from .abc import DBModelBase
 from ..system.const import SHORT_TEXT_LENGTH, AccessLevel
 
 if TYPE_CHECKING:

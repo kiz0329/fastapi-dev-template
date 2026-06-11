@@ -1,6 +1,6 @@
 from typing import Annotated, Optional
 from pydantic import Field
-from .base import UploadSchema, ResponseSchema, QuerySchema
+from .abc import UploadSchema, ResponseSchema, QuerySchema
 
 
 class UserUploadSchema(UploadSchema):

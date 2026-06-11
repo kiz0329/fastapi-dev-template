@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from datetime import datetime, timedelta, timezone
 from pydantic import Field
-from .base import UploadSchema, ResponseSchema, QuerySchema
+from .abc import UploadSchema, ResponseSchema, QuerySchema
 
 
 class RefreshTokenUploadSchema(UploadSchema):

@@ -3,8 +3,8 @@ from collections.abc import Sequence
 import re
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from ..schema.base import UploadSchema, QuerySchema
-from ..model.base import DBModelBase
+from ..schema.abc import UploadSchema, QuerySchema
+from ..model.abc import DBModelBase
 from ..database import SessionDep
 from ..system.error import (
     ResourceNotFoundError,
