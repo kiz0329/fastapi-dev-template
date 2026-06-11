@@ -79,32 +79,23 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta = timedel
 
 
 def verify_token(token: str):
+    unauthenticated_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         username = payload.get("sub")
         scope_str = str(payload.get("scopes", ""))
         if username is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing username",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise unauthenticated_exception
         return TokenData(
             username=username,
             scopes=scope_str.split()
         )
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        raise unauthenticated_exception
 
 
 # Refresh token

@@ -1,10 +1,6 @@
-from fastapi import HTTPException, status
 from .scope import AccessLevel, generate_access_level_scopes
 from ..database import SessionDep
-from ..service.password import hash_password
-from ..schema.user import UserUploadSchema, UserResponseSchema
 from ..crud import user_crud
-from ..system.error import ResourceNotFoundError
 
 
 async def expel_user(username: str, db_session: SessionDep):
