@@ -4,6 +4,14 @@ from .base import UploadSchema, ResponseSchema, QuerySchema
 
 
 class UserUploadSchema(UploadSchema):
+    username: Annotated[
+        str,
+        Field(description="The unique username for authentication")
+    ]
+    hashed_password: Annotated[
+        str,
+        Field(description="The hashed password for authentication")
+    ]
     first_name: Annotated[
         str,
         Field(description="The first name of the user")
@@ -14,7 +22,15 @@ class UserUploadSchema(UploadSchema):
     ]
 
 
-class UserResponseSchema(ResponseSchema):
+class UnhashedUserUploadSchema(UploadSchema):
+    username: Annotated[
+        str,
+        Field(description="The unique username for authentication")
+    ]
+    password: Annotated[
+        str,
+        Field(description="The unhashed password for authentication")
+    ]
     first_name: Annotated[
         str,
         Field(description="The first name of the user")
@@ -26,6 +42,10 @@ class UserResponseSchema(ResponseSchema):
 
 
 class UserQuerySchema(QuerySchema):
+    username: Annotated[
+        Optional[str],
+        Field(description="Filter users by username for authentication")
+    ] = None
     first_name: Annotated[
         Optional[str],
         Field(description="Filter users by first name")
@@ -34,3 +54,18 @@ class UserQuerySchema(QuerySchema):
         Optional[str],
         Field(description="Filter users by last name")
     ] = None
+
+
+class UserResponseSchema(ResponseSchema):
+    username: Annotated[
+        str,
+        Field(description="The unique username for authentication")
+    ]
+    first_name: Annotated[
+        str,
+        Field(description="The first name of the user")
+    ]
+    last_name: Annotated[
+        str,
+        Field(description="The last name of the user")
+    ]

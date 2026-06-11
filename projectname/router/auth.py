@@ -1,0 +1,85 @@
+from typing import Annotated
+from fastapi import APIRouter, Depends, Path, Query, Body, HTTPException, status, Security
+from fastapi.security import OAuth2PasswordRequestForm
+from ..database import AsyncSession, get_db_session
+from ..model.user import User
+from ..schema.user import UnhashedUserUploadSchema, UserResponseSchema
+from ..schema.token import Token, RefreshToken
+from ..crud import refreshtoken_crud
+from ..system.error import ResourceNotFoundError
+from ..service.token import generate_tokens, regenerate_tokens, TokenData
+from ..service.account import register_user, modify_user_access_level
+from ..service.authorization import get_current_user
+from ..service.authentication import authenticate_user
+from ..service.scope import AccessLevel, get_access_level_scope
+
+
+router = APIRouter(
+    prefix="/auth",
+    tags=["auth"],
+)
+
+
+@router.post("/token")
+async def sign_in(
+        user: Annotated[
+            User,
+            Depends(authenticate_user)
+        ],
+        db_session: Annotated[AsyncSession, Depends(get_db_session)]
+):
+    return await generate_tokens(user, db_session)
+
+
+@router.post("/refresh")
+async def refresh_token(
+        refresh_token_data: Annotated[RefreshToken, Body()],
+        db_session: Annotated[AsyncSession, Depends(get_db_session)]
+):
+    return await regenerate_tokens(refresh_token_data.token, db_session)
+
+
+@router.post("/signout", response_model=UserResponseSchema)
+async def sign_out(
+    refresh_token_data: Annotated[RefreshToken, Body()],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    token_data: Annotated[TokenData, Security(get_current_user, scopes=[])],
+):
+    model = await refreshtoken_crud.get_by_token(refresh_token_data.token, db_session)
+    if model.user.username != token_data.username:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    await refreshtoken_crud.delete(model.id, db_session)
+    return model.user
+
+
+@router.post("/signup", response_model=UserResponseSchema, status_code=status.HTTP_201_CREATED)
+async def sign_up(
+    user: Annotated[UnhashedUserUploadSchema, Body()],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)]
+):
+    return await register_user(user, db_session)
+
+
+@router.put("/{user_id}", response_model=UserResponseSchema)
+async def change_access_level(
+    user_id: Annotated[int, Path(description="The ID of the user to modify")],
+    access_level: Annotated[AccessLevel, Query(description="The new access level for the user")],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    token_data: Annotated[
+        TokenData,
+        Security(get_current_user,
+                 scopes=[get_access_level_scope(AccessLevel.ADMIN)])
+    ],
+):
+    try:
+        modified_user = await modify_user_access_level(user_id, access_level, db_session)
+    except ResourceNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return modified_user
