@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from .base import DBModelBase
-from ....system.const import SHORT_TEXT_LENGTH
+from ..system.const import SHORT_TEXT_LENGTH
+from ..service.accesslevel import provide_access_level_scope_str, AccessLevel
 
 
 if TYPE_CHECKING:
@@ -24,7 +25,8 @@ class UserCredential(DBModelBase):
     )
     scope: Mapped[str] = mapped_column(
         String(SHORT_TEXT_LENGTH),
-        nullable=False
+        nullable=False,
+        default=provide_access_level_scope_str(AccessLevel.GUEST)
     )
     user_id: Mapped[int] = mapped_column(
         Integer,

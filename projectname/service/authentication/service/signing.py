@@ -6,13 +6,10 @@ from ...password import hash_password, verify_password
 from ..crud import usercredential_crud
 from ..schema.usercredential import UserCredentialUploadSchema, UserCredentialQuerySchema
 from ..system import ResourceNotFoundError
+from ..system.error import UNAUTHORIZED_EXCEPTION
+from ..service.accesslevel import provide_access_level_scope_str, AccessLevel
 
 _DUMMY_PASSWORD_HASH = hash_password("dummy_password")
-UNAUTHORIZED_EXCEPTION = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Incorrect username or password",
-    headers={"WWW-Authenticate": "Bearer"},
-)
 
 
 async def register_user(
@@ -24,12 +21,12 @@ async def register_user(
     user_credential = UserCredentialUploadSchema(
         username=username,
         password_hash=password_hash,
-        scope="user"
+        scope=provide_access_level_scope_str(AccessLevel.GUEST)
     )
     return await usercredential_crud.create(user_credential, db_session)
 
 
-async def get_user_by_username(
+async def _get_user_by_username(
         username: str,
         db_session: Annotated[AsyncSession, Depends(get_db_session)]
 ):
@@ -54,9 +51,9 @@ async def authenticate_user(
         form_data: OAuth2PasswordRequestForm,
         db_session: Annotated[AsyncSession, Depends(get_db_session)]
 ):
-    user_credential = await get_user_by_username(form_data.username, db_session)
+    user_credential = await _get_user_by_username(form_data.username, db_session)
     if user_credential is None:
-        verify_password("dummy_password", _DUMMY_PASSWORD_HASH)
+        verify_password(form_data.password, _DUMMY_PASSWORD_HASH)
         raise UNAUTHORIZED_EXCEPTION
     if not verify_password(form_data.password, user_credential.password_hash):
         raise UNAUTHORIZED_EXCEPTION
@@ -67,7 +64,7 @@ async def delete_user(
         username: str,
         db_session: Annotated[AsyncSession, Depends(get_db_session)]
 ):
-    user_credential = await get_user_by_username(username, db_session)
+    user_credential = await _get_user_by_username(username, db_session)
     if user_credential is None:
         raise UNAUTHORIZED_EXCEPTION
     try:

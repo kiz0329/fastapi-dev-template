@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from pydantic import BaseModel, Field
 from .base import QuerySchema, ResponseSchema, UploadSchema
-from ....system.const import SHORT_TEXT_LENGTH
+from ..system.const import SHORT_TEXT_LENGTH
 
 
 class UserCredentialUploadSchema(UploadSchema):
@@ -37,6 +37,12 @@ class UserCredentialQuerySchema(QuerySchema):
         Field(
             description="Filter by username of the user credential",
             max_length=SHORT_TEXT_LENGTH)
+    ] = None
+    undefined_user_id: Annotated[
+        Optional[int],
+        Field(
+            description="Filter by user ID associated with the credential"
+        )
     ] = None
 
 
