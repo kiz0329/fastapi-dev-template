@@ -3,22 +3,32 @@ from collections.abc import Sequence
 import re
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from ..schema.abc import UploadSchema, QuerySchema
-from ..model.abc import DBModelBase
+from ..schema.abc import (
+    UploadSchemaBase,
+    QuerySchemaBase,
+    UserUploadSchemaBase,
+    UserQuerySchemaBase,
+)
+from ..model.abc import DBModelBase, UserModelBase
 from ..database import SessionDep
+from ..service.password import verify_password, hash_password
 from ..system.error import (
     ResourceNotFoundError,
     UniqueConstraintError,
     CheckConstraintError,
     ExclusionConstraintError,
     ForeignKeyConstraintError,
-    NotNullConstraintError
+    NotNullConstraintError,
 )
 
 
 TModel = TypeVar('TModel', bound=DBModelBase)
-TUploadSchema = TypeVar('TUploadSchema', bound=UploadSchema)
-TQuerySchema = TypeVar('TQuerySchema', bound=QuerySchema)
+TUploadSchema = TypeVar('TUploadSchema', bound=UploadSchemaBase)
+TQuerySchema = TypeVar('TQuerySchema', bound=QuerySchemaBase)
+
+TUserModel = TypeVar('TUserModel', bound=UserModelBase)
+TUserUploadSchema = TypeVar('TUserUploadSchema', bound=UserUploadSchemaBase)
+TUserQuerySchema = TypeVar('TUserQuerySchema', bound=UserQuerySchemaBase)
 
 WILDCARD_REGEX = re.compile(
     r'|'.join([
@@ -30,6 +40,8 @@ WILDCARD_REGEX = re.compile(
         r'(?P<underscore>_)'
     ])
 )
+
+DUMMY_PASSWORD_HASH = hash_password("dummy_password")
 
 
 def _diagnose_integrity_error(e: IntegrityError):
@@ -111,11 +123,11 @@ class CRUDBase(Generic[TModel, TUploadSchema, TQuerySchema]):
             id: int,
             db_session: SessionDep) -> TModel:
         result = await db_session.execute(select(self._model).where(self._model.id == id))
-        if (res := result.scalars().first()) is None:
+        model = result.scalar_one_or_none()
+        if model is None:
             raise ResourceNotFoundError(
                 f"{self._model.__name__} with id {id} not found")
-        else:
-            return res
+        return model
 
     async def update(
             self,
@@ -158,3 +170,53 @@ def _from_glob_to_like(glob_pattern: str) -> str:
         "underscore": "\\_",
         None: ""
     }[m.lastgroup], glob_pattern)
+
+
+class UserCRUDBase(CRUDBase[TUserModel, TUserUploadSchema, TUserQuerySchema]):
+    async def create(
+            self,
+            upload_schema: TUserUploadSchema,
+            db_session: SessionDep) -> TUserModel:
+        hashed_password = hash_password(upload_schema.password)
+        upload_data = upload_schema.model_dump(exclude={"password"})
+        upload_data["hashed_password"] = hashed_password
+        obj = self._model(**upload_data)
+        db_session.add(obj)
+        try:
+            await db_session.commit()
+        except IntegrityError as e:
+            await db_session.rollback()
+            _diagnose_integrity_error(e)
+
+        await db_session.refresh(obj)
+        return obj
+
+    async def get_by_username(
+            self,
+            username: str,
+            db_session: SessionDep) -> TUserModel:
+        result = await db_session.execute(select(self._model).where(self._model.username == username))
+        model = result.scalar_one_or_none()
+        if model is None:
+            raise ResourceNotFoundError(
+                f"{self._model.__name__} with username '{username}' not found"
+            )
+        return model
+
+    async def get_by_username_and_password(
+            self,
+            username: str,
+            password: str,
+            db_session: SessionDep) -> TUserModel:
+        resource_not_found = ResourceNotFoundError(
+            f"{self._model.__name__} with username '{username}' and provided password not found"
+        )
+        try:
+            model = await self.get_by_username(username, db_session)
+        except ResourceNotFoundError:
+            # Perform dummy password verification to mitigate timing attacks
+            verify_password(password, DUMMY_PASSWORD_HASH)
+            raise resource_not_found
+        if not verify_password(password, model.hashed_password):
+            raise resource_not_found
+        return model

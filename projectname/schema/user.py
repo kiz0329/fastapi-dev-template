@@ -1,17 +1,9 @@
 from typing import Annotated, Optional
 from pydantic import Field
-from .abc import UploadSchema, ResponseSchema, QuerySchema
+from .abc import UserUploadSchemaBase, UserResponseSchemaBase, UserQuerySchemaBase
 
 
-class UserUploadSchema(UploadSchema):
-    username: Annotated[
-        str,
-        Field(description="The unique username for authentication")
-    ]
-    hashed_password: Annotated[
-        str,
-        Field(description="The hashed password for authentication")
-    ]
+class UserUploadSchema(UserUploadSchemaBase):
     first_name: Annotated[
         str,
         Field(description="The first name of the user")
@@ -22,30 +14,7 @@ class UserUploadSchema(UploadSchema):
     ]
 
 
-class UnhashedUserUploadSchema(UploadSchema):
-    username: Annotated[
-        str,
-        Field(description="The unique username for authentication")
-    ]
-    password: Annotated[
-        str,
-        Field(description="The unhashed password for authentication")
-    ]
-    first_name: Annotated[
-        str,
-        Field(description="The first name of the user")
-    ]
-    last_name: Annotated[
-        str,
-        Field(description="The last name of the user")
-    ]
-
-
-class UserQuerySchema(QuerySchema):
-    username: Annotated[
-        Optional[str],
-        Field(description="Filter users by username for authentication")
-    ] = None
+class UserQuerySchema(UserQuerySchemaBase):
     first_name: Annotated[
         Optional[str],
         Field(description="Filter users by first name")
@@ -56,11 +25,7 @@ class UserQuerySchema(QuerySchema):
     ] = None
 
 
-class UserResponseSchema(ResponseSchema):
-    username: Annotated[
-        str,
-        Field(description="The unique username for authentication")
-    ]
+class UserResponseSchema(UserResponseSchemaBase):
     first_name: Annotated[
         str,
         Field(description="The first name of the user")

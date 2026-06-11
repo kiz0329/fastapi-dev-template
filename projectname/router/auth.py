@@ -1,14 +1,14 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, Body, HTTPException, status, Security
 from fastapi.security import OAuth2PasswordRequestForm
-from ..database import SessionDep, get_db_session
+from ..database import SessionDep
 from ..model.user import User
-from ..schema.user import UnhashedUserUploadSchema, UserResponseSchema
+from ..schema.user import UserUploadSchema, UserResponseSchema
 from ..schema.token import Token, RefreshToken
 from ..crud import refreshtoken_crud, user_crud
 from ..system.error import ResourceNotFoundError
 from ..service.token import generate_tokens, regenerate_tokens, TokenData
-from ..service.account import register_user, modify_user_access_level
+from ..service.account import modify_user_access_level
 from ..service.authorization import get_current_user
 from ..service.authentication import authenticate_user
 from ..service.scope import AccessLevel, get_access_level_scope
@@ -58,10 +58,10 @@ async def sign_out(
 
 @router.post("/signup", response_model=UserResponseSchema, status_code=status.HTTP_201_CREATED)
 async def sign_up(
-    user: Annotated[UnhashedUserUploadSchema, Body()],
+    user: Annotated[UserUploadSchema, Body()],
     db_session: SessionDep
 ):
-    return await register_user(user, db_session)
+    return await user_crud.create(user, db_session)
 
 
 @router.put("/{user_id}", response_model=UserResponseSchema)
@@ -89,8 +89,7 @@ async def change_access_level(
 async def get_users(
     token_data: Annotated[
         TokenData,
-        Security(get_current_user,
-                 scopes=[])
+        Security(get_current_user, scopes=[])
     ],
     db_session: SessionDep,
 ):

@@ -3,11 +3,11 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class UploadSchema(BaseModel):
+class UploadSchemaBase(BaseModel):
     pass
 
 
-class ResponseSchema(BaseModel):
+class ResponseSchemaBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: Annotated[
@@ -21,7 +21,7 @@ class ResponseSchema(BaseModel):
         Field(description="The timestamp of the last update")]
 
 
-class QuerySchema(BaseModel):
+class QuerySchemaBase(BaseModel):
     created_at_from: Annotated[
         Optional[datetime],
         Field(description="Filter objects created after this timestamp")
@@ -37,4 +37,41 @@ class QuerySchema(BaseModel):
     updated_at_to: Annotated[
         Optional[datetime],
         Field(description="Filter objects updated before this timestamp")
+    ] = None
+
+
+class UserUploadSchemaBase(UploadSchemaBase):
+    username: Annotated[
+        str,
+        Field(description="The unique username for authentication")
+    ]
+    password: Annotated[
+        str,
+        Field(description="The password for authentication")
+    ]
+    scopes: Annotated[
+        str,
+        Field(description="The space-separated scopes for the user")
+    ]
+
+
+class UserResponseSchemaBase(ResponseSchemaBase):
+    username: Annotated[
+        str,
+        Field(description="The unique username for authentication")
+    ]
+    hashed_password: Annotated[
+        str,
+        Field(description="The hashed password for authentication")
+    ]
+    scopes: Annotated[
+        str,
+        Field(description="The space-separated scopes for the user")
+    ]
+
+
+class UserQuerySchemaBase(QuerySchemaBase):
+    username: Annotated[
+        Optional[str],
+        Field(description="Filter users by username for authentication")
     ] = None

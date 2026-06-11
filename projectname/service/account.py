@@ -2,17 +2,9 @@ from fastapi import HTTPException, status
 from .scope import AccessLevel, generate_access_level_scopes
 from ..database import SessionDep
 from ..service.password import hash_password
-from ..schema.user import UserUploadSchema, UserResponseSchema, UnhashedUserUploadSchema
+from ..schema.user import UserUploadSchema, UserResponseSchema
 from ..crud import user_crud
 from ..system.error import ResourceNotFoundError
-
-
-async def register_user(user_data: UnhashedUserUploadSchema, db_session: SessionDep):
-    attributes = user_data.model_dump(exclude={"password"})
-    attributes.update({"hashed_password": hash_password(user_data.password)})
-    new_user = UserUploadSchema.model_validate(attributes)
-    created_user = await user_crud.create(new_user, db_session)
-    return created_user
 
 
 async def expel_user(username: str, db_session: SessionDep):

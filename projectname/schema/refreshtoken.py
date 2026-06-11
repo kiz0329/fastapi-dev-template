@@ -1,10 +1,10 @@
 from typing import Annotated, Optional
 from datetime import datetime, timedelta, timezone
 from pydantic import Field
-from .abc import UploadSchema, ResponseSchema, QuerySchema
+from .abc import UploadSchemaBase, ResponseSchemaBase, QuerySchemaBase
 
 
-class RefreshTokenUploadSchema(UploadSchema):
+class RefreshTokenUploadSchema(UploadSchemaBase):
     token: Annotated[
         str,
         Field(description="The refresh token to be refreshed")
@@ -19,7 +19,7 @@ class RefreshTokenUploadSchema(UploadSchema):
     ]
 
 
-class RefreshTokenQuerySchema(QuerySchema):
+class RefreshTokenQuerySchema(QuerySchemaBase):
     token: Annotated[
         Optional[str],
         Field(description="Filter by the refresh token to be refreshed")
@@ -34,7 +34,7 @@ class RefreshTokenQuerySchema(QuerySchema):
     ] = None
 
 
-class RefreshTokenResponseSchema(ResponseSchema):
+class RefreshTokenResponseSchema(ResponseSchemaBase):
     token: Annotated[
         str,
         Field(description="The refresh token to be refreshed")

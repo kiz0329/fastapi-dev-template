@@ -1,27 +1,11 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
-from .abc import DBModelBase
-from ..system.const import SHORT_TEXT_LENGTH, AccessLevel
-from ..service.scope import generate_access_level_scopes
+from .abc import UserModelBase
+from ..system.const import SHORT_TEXT_LENGTH
 
 
-class User(DBModelBase):
+class User(UserModelBase):
     __tablename__ = "users"
-
-    username: Mapped[str] = mapped_column(
-        String(SHORT_TEXT_LENGTH),
-        unique=True,
-        nullable=False
-    )
-    hashed_password: Mapped[str] = mapped_column(
-        String(SHORT_TEXT_LENGTH),
-        nullable=False
-    )
-    scopes: Mapped[str] = mapped_column(
-        String(SHORT_TEXT_LENGTH),
-        nullable=False,
-        default=" ".join(generate_access_level_scopes(AccessLevel.GUEST))
-    )
 
     # Define your user model fields here, for example:
     first_name: Mapped[str] = mapped_column(
