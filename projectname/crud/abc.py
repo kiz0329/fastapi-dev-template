@@ -1,4 +1,4 @@
-from typing import Type, Generic, TypeVar, Optional
+from typing import Type, Generic, TypeVar
 from collections.abc import Sequence
 import re
 from sqlalchemy import select

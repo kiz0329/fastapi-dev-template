@@ -52,7 +52,8 @@ class UserUploadSchemaBase(UploadSchemaBase):
     ]
     access_level: Annotated[
         AccessLevel,
-        Field(description="The access level for the user", default=AccessLevel.GUEST)
+        Field(description="The access level for the user",
+              default=AccessLevel.GUEST)
     ]
 
 

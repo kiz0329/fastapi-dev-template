@@ -1,10 +1,9 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, Body, HTTPException, status, Security
-from fastapi.security import OAuth2PasswordRequestForm
 from ..database import SessionDep
 from ..model.user import User
 from ..schema.user import UserUploadSchema, UserResponseSchema
-from ..schema.token import Token, RefreshToken
+from ..schema.token import RefreshToken
 from ..crud import refreshtoken_crud, user_crud
 from ..system.const import AccessLevel, ADMIN_SCOPE
 from ..system.error import ResourceNotFoundError

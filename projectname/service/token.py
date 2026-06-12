@@ -9,7 +9,7 @@ from ..database import SessionDep
 from ..model.user import User
 from ..schema.refreshtoken import RefreshTokenUploadSchema
 from ..model.refreshtoken import RefreshToken as RefreshTokenModel
-from ..schema.token import Token, RefreshToken
+from ..schema.token import Token
 from ..service.scope import AccessLevel, generate_access_level_scopes
 from ..system.const import SHORT_TEXT_LENGTH
 from ..system.error import ResourceNotFoundError, UniqueConstraintError

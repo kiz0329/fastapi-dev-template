@@ -1,5 +1,5 @@
 from typing import Annotated, Optional
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from pydantic import Field
 from .abc import UploadSchemaBase, ResponseSchemaBase, QuerySchemaBase
 
@@ -30,7 +30,8 @@ class RefreshTokenQuerySchema(QuerySchemaBase):
     ] = None
     expire_at_to: Annotated[
         Optional[datetime],
-        Field(description="Filter by the end of the expiration time range for refresh tokens")
+        Field(
+            description="Filter by the end of the expiration time range for refresh tokens")
     ] = None
 
 
