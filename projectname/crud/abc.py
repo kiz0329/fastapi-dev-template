@@ -194,6 +194,26 @@ class UserCRUDBase(CRUDBase[TUserModel, TUserUploadSchema, TUserQuerySchema]):
         await db_session.refresh(obj)
         return obj
 
+    async def update(
+            self,
+            id: int,
+            upload_schema: TUserUploadSchema,
+            db_session: SessionDep) -> TUserModel:
+        obj = await self.get_by_id(id, db_session)
+        for field, value in upload_schema.model_dump(exclude_unset=False, exclude={"password"}).items():
+            setattr(obj, field, value)
+        if upload_schema.password is not None:
+            obj.hashed_password = hash_password(upload_schema.password)
+        db_session.add(obj)
+        try:
+            await db_session.commit()
+        except IntegrityError as e:
+            await db_session.rollback()
+            _diagnose_integrity_error(e)
+
+        await db_session.refresh(obj)
+        return obj
+
     async def get_by_username(
             self,
             username: str,
