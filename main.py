@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.exception_handlers import http_exception_handler
-from starlette.middleware import Middleware
 from __project_name__.database import engine
 from __project_name__.model.abc import Base
 from __project_name__.router import auth_router
