@@ -13,7 +13,7 @@ from ..schema.token import Token
 from ..service.scope import AccessLevel, generate_access_level_scopes
 from ..system.const import SHORT_TEXT_LENGTH
 from ..system.error import ResourceNotFoundError, UniqueConstraintError
-from ..system.environment import JWT_ALGORITHM, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_DAYS
+from ..system.const import JWT_ALGORITHM, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_EXPIRE_DAYS
 
 
 #
@@ -34,7 +34,7 @@ async def generate_tokens(user: User, db_session: SessionDep) -> Token:
     access_level = AccessLevel(user.access_level)
     data = {
         "sub": user.username,
-        "scopes": generate_access_level_scopes(access_level),
+        "scopes": " ".join(generate_access_level_scopes(access_level)),
     }
     return Token(
         access_token=create_access_token(data),
@@ -57,7 +57,7 @@ async def regenerate_tokens(refresh_token: str, db_session: SessionDep) -> Token
     access_level = AccessLevel(user.access_level)
     data = {
         "sub": user.username,
-        "scopes": generate_access_level_scopes(access_level),
+        "scopes": " ".join(generate_access_level_scopes(access_level)),
     }
     model = await rotate_refresh_token(model, db_session)
     return Token(

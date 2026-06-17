@@ -50,11 +50,6 @@ class UserUploadSchemaBase(UploadSchemaBase):
         str,
         Field(description="The password for authentication")
     ]
-    access_level: Annotated[
-        AccessLevel,
-        Field(description="The access level for the user",
-              default=AccessLevel.GUEST)
-    ]
 
 
 class UserResponseSchemaBase(ResponseSchemaBase):

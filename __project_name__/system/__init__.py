@@ -1,5 +1,5 @@
 from .const import SHORT_TEXT_LENGTH
-from .environment import (
+from .const import (
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES,
     JWT_ALGORITHM,
     JWT_SECRET_KEY,
