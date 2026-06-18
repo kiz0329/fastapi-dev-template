@@ -34,6 +34,7 @@ async def ensure_developer_account():
 
         if not user:
             user = User()
+            user.username = DEVELOPER_USER_NAME
             fill_developer_info(user)
             db_session.add(user)
         else:
