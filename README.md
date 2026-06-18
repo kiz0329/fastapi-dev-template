@@ -181,7 +181,7 @@ All endpoints are under the `/auth` prefix.
 pytest
 ```
 
-Tests use an in-memory SQLite database and do not require a running PostgreSQL instance.
+Tests connect to the PostgreSQL instance configured via the `DATABASE_URL` environment variable. Make sure the database is running before executing the test suite.
 
 ## Tech Stack
 
