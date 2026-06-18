@@ -183,6 +183,27 @@ pytest
 
 Tests connect to the PostgreSQL instance configured via the `DATABASE_URL` environment variable. Make sure the database is running before executing the test suite.
 
+## License
+
+This template is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+### Third-Party Dependencies
+
+This template uses the following third-party software:
+
+- **Python packages** (FastAPI, SQLAlchemy, PyJWT, etc.) — see `requirements.txt` for versions and their respective licenses
+- **Base container images:**
+  - Development: `mcr.microsoft.com/devcontainers/python:3-3.14-trixie` (Microsoft)
+  - Production: `python:3-3.14-trixie` (Python Software Foundation)
+  - Database: `postgres:17` (PostgreSQL Global Development Group)
+- **Dev Container Features:** `devcontainers-extra/features/curl-apt-get` and `nlstn/devcontainer-features/psql`
+
+When **extending or deploying** this template, ensure you comply with the licenses of any included dependencies. If you redistribute a container image built from this template, please provide appropriate license notices and attributions.
+
+### Your Project's License
+
+Projects created from this template are **independent** of this template's license. You may choose any license for your derived project (MIT, Apache 2.0, GPL, proprietary, etc.). We recommend documenting your choice in your project's `LICENSE` file.
+
 ## Tech Stack
 
 - **Framework:** FastAPI 0.136
