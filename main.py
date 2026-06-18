@@ -29,8 +29,8 @@ async def ensure_developer_account():
         def fill_developer_info(user: User):
             user.hashed_password = hash_password(DEVELOPER_USER_PASSWORD)
             user.access_level = AccessLevel.DEVELOPER.value
-            user.first_name = "安治川"
-            user.last_name = "鐵之助"
+            user.first_name = "John"
+            user.last_name = "Doe"
 
         if not user:
             user = User()
