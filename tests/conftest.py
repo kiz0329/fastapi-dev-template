@@ -26,8 +26,8 @@ async def db_session():
                 username=DEVELOPER_USER_NAME,
                 hashed_password=hash_password(DEVELOPER_USER_PASSWORD),
                 access_level=AccessLevel.DEVELOPER.value,
-                first_name="安治川",
-                last_name="鐵之助",
+                first_name="Jane",
+                last_name="Doe",
             ))
             await session.commit()
 
